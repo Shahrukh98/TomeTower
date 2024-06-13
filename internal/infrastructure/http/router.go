@@ -15,6 +15,7 @@ func UserRouter(repo user.UserRepository) *http.ServeMux {
 	router := http.NewServeMux()
 	router.HandleFunc("/register", handler.AddUser)
 	router.HandleFunc("/login", handler.FindUserById)
+	router.HandleFunc("/update-nick", handler.UpdateNick)
 	return router
 }
 

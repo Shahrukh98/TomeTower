@@ -25,3 +25,8 @@ func (r *UserPostgresRepository) FindByID(id string) (user.User, error) {
 	err := row.Scan(&user.ID, &user.Name, &user.Nick, &user.Email, &user.Password, &user.NickUpdatedAt, &user.CreatedAt, &user.UpdatedAt)
 	return user, err
 }
+
+func (r *UserPostgresRepository) UpdateNick(id string, nick string) error {
+	_, err := r.db.Exec("update users set nick = $1, nick_last_updated = current_timestamp  where id = $2", nick, id)
+	return err
+}

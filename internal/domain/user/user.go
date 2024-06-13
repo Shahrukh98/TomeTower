@@ -12,3 +12,9 @@ type User struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
+
+type NickUpdate struct {
+	Nick string
+}
+
+const NickUpdateCooldown = 3600

@@ -24,3 +24,7 @@ func (s *UserService) AddUser(user User) error {
 func (s *UserService) FindUserById(id string) (User, error) {
 	return s.repo.FindByID(id)
 }
+
+func (s *UserService) UpdateNick(id string, nick string) error {
+	return s.repo.UpdateNick(id, nick)
+}
