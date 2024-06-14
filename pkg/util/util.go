@@ -1,14 +1,61 @@
-// pkg/util/util.go
 package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var secretKey = []byte(os.Getenv("JWT_SECRET"))
+
+type UserClaims struct {
+	ID   string
+	Name string
+	jwt.RegisteredClaims
+}
+
+func CreateToken(userID, name string) (string, error) {
+	expirationTime := time.Now().Add(5 * time.Minute)
+
+	claims := &UserClaims{
+		ID:   userID,
+		Name: name,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+func VerifyToken(tokenString string) (*UserClaims, error) {
+	claims := &UserClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return claims, nil
+}
 
 // LoggingMiddleware logs details of each incoming HTTP request
 func LoggingMiddleware(next *http.ServeMux) http.Handler {

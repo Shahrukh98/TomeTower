@@ -1,6 +1,8 @@
 package user
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID            string
@@ -18,3 +20,15 @@ type NickUpdate struct {
 }
 
 const NickUpdateCooldown = 3600
+
+type UserLoginResponse struct {
+	ID    string
+	Name  string
+	Nick  string
+	Token string
+}
+
+type UserLoginRequest struct {
+	Email    string
+	Password string
+}

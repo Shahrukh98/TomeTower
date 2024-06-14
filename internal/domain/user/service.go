@@ -21,6 +21,10 @@ func (s *UserService) AddUser(user User) error {
 	return s.repo.Add(user)
 }
 
+func (s *UserService) FindByEmail(email string) (User, error) {
+	return s.repo.FindByEmail(email)
+}
+
 func (s *UserService) FindUserById(id string) (User, error) {
 	return s.repo.FindByID(id)
 }

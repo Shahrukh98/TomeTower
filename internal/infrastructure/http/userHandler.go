@@ -40,10 +40,58 @@ func (h *UserHandler) AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		{
+			var userRequest user.UserLoginRequest
+			var userResponse user.UserLoginResponse
+
+			err := util.ParseJSONBody(w, r, &userRequest)
+			if err != nil {
+				util.JSONResponse(w, http.StatusBadRequest, map[string]string{"error": "Invalid request payload"})
+				return
+			}
+
+			user, err := h.service.FindByEmail(userRequest.Email)
+			if err != nil {
+				util.LogError(err, "Failed to get user by email")
+				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Failed to get user by email"})
+				return
+			}
+
+			err = util.VerifyPassword(user.Password, userRequest.Password)
+			if err != nil {
+				util.LogError(err, "Invalid Password")
+				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Invalid Password"})
+				return
+			}
+
+			token, err := util.CreateToken(user.ID, user.Name)
+
+			if err != nil {
+				util.LogError(err, "Cant create token")
+				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Cant create token"})
+				return
+			}
+
+			userResponse.ID = user.ID
+			userResponse.Name = user.Name
+			userResponse.Nick = user.Nick
+			userResponse.Token = token
+
+			util.JSONResponse(w, http.StatusOK, userResponse)
+		}
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 func (h *UserHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		{
+			var userResponse user.UserLoginResponse
 			id := r.URL.Query().Get("id")
 			if id == "" {
 				util.JSONResponse(w, http.StatusBadRequest, map[string]string{"error": "Missing id parameter"})
@@ -51,13 +99,18 @@ func (h *UserHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 			}
 
 			user, err := h.service.FindUserById(id)
+			token, err := util.CreateToken(user.ID, user.Name)
+
 			if err != nil {
 				util.LogError(err, "Failed to get user")
 				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Failed to get user"})
 				return
 			}
+			userResponse.ID = user.ID
+			userResponse.Name = user.Name
+			userResponse.Token = token
 
-			util.JSONResponse(w, http.StatusOK, user)
+			util.JSONResponse(w, http.StatusOK, userResponse)
 		}
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
