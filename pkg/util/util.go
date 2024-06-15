@@ -20,6 +20,20 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
+type Logger struct {
+	handler http.Handler
+}
+
+func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	l.handler.ServeHTTP(w, r)
+	log.Printf("%s  %s %v", r.Method, r.URL.Path, time.Since(start))
+}
+
+func NewLogger(handlerToWrap http.Handler) *Logger {
+	return &Logger{handlerToWrap}
+}
+
 func CreateToken(userID, name string) (string, error) {
 	expirationTime := time.Now().Add(5 * time.Minute)
 
@@ -55,24 +69,6 @@ func VerifyToken(tokenString string) (*UserClaims, error) {
 	}
 
 	return claims, nil
-}
-
-// LoggingMiddleware logs details of each incoming HTTP request
-func LoggingMiddleware(next *http.ServeMux) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		// Log the request details
-		log.Printf(
-			"%s %s %s",
-			r.Method,
-			r.RequestURI,
-			time.Since(start),
-		)
-
-		// Call the next handler (the underlying ServeMux)
-		next.ServeHTTP(w, r)
-	})
 }
 
 // JSONResponse is a utility function to send a JSON response.

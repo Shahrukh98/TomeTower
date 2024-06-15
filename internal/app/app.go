@@ -36,7 +36,6 @@ func NewApp() *App {
 	}
 
 	appRouter := myhttp.TomeTowerRouter(db)
-	util.LoggingMiddleware(appRouter)
 
 	return &App{
 		AppRouter: appRouter,
@@ -45,5 +44,6 @@ func NewApp() *App {
 
 func (app *App) Run(addr string) error {
 	log.Printf("Server started on %s", addr)
-	return http.ListenAndServe(addr, app.AppRouter)
+	wrappedRouter := util.NewLogger(app.AppRouter)
+	return http.ListenAndServe(addr, wrappedRouter)
 }
