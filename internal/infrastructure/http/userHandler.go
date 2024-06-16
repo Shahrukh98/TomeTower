@@ -1,6 +1,7 @@
 package http
 
 import (
+	"log"
 	"net/http"
 	"time"
 	"tometower/internal/domain/user"
@@ -121,6 +122,8 @@ func (h *UserHandler) UpdateNick(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		{
+			userC := GetUserFromContext(r)
+			log.Println(userC.ID) // Just testing
 			id := r.URL.Query().Get("id")
 			if id == "" {
 				util.JSONResponse(w, http.StatusBadRequest, map[string]string{"error": "Missing id parameter"})
