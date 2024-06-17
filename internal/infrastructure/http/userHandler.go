@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log"
 	"net/http"
 	"time"
 	"tometower/internal/domain/user"
@@ -41,7 +40,7 @@ func (h *UserHandler) AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetByEmail(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		{
@@ -54,7 +53,7 @@ func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			user, err := h.service.FindByEmail(userRequest.Email)
+			user, err := h.service.GetByEmail(userRequest.Email)
 			if err != nil {
 				util.LogError(err, "Failed to get user by email")
 				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Failed to get user by email"})
@@ -88,7 +87,7 @@ func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		{
@@ -99,7 +98,7 @@ func (h *UserHandler) FindUserById(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			user, err := h.service.FindUserById(id)
+			user, err := h.service.GetUserById(id)
 			token, err := util.CreateToken(user.ID, user.Name)
 
 			if err != nil {
@@ -123,14 +122,8 @@ func (h *UserHandler) UpdateNick(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		{
 			userC := GetUserFromContext(r)
-			log.Println(userC.ID) // Just testing
-			id := r.URL.Query().Get("id")
-			if id == "" {
-				util.JSONResponse(w, http.StatusBadRequest, map[string]string{"error": "Missing id parameter"})
-				return
-			}
 
-			userObj, err := h.service.FindUserById(id)
+			userObj, err := h.service.GetUserById(userC.ID)
 			if err != nil {
 				util.LogError(err, "Failed to get user")
 				util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Failed to get user"})
@@ -145,10 +138,10 @@ func (h *UserHandler) UpdateNick(w http.ResponseWriter, r *http.Request) {
 			} else {
 				var parsedJson user.NickUpdate
 				err = util.ParseJSONBody(w, r, &parsedJson)
-				err = h.service.UpdateNick(id, parsedJson.Nick)
+				err = h.service.UpdateNick(userC.ID, parsedJson.Nick)
 				if err != nil {
-					util.LogError(err, "Failed to get useraa")
-					util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Failed to get user"})
+					util.LogError(err, "Cannot update nick!")
+					util.JSONResponse(w, http.StatusInternalServerError, map[string]string{"error": "Cannot update nick!"})
 					return
 				}
 

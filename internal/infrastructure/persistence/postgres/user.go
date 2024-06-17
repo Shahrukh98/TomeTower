@@ -18,7 +18,7 @@ func (r *UserPostgresRepository) Add(user user.User) error {
 	return err
 }
 
-func (r *UserPostgresRepository) FindByEmail(email string) (user.User, error) {
+func (r *UserPostgresRepository) GetByEmail(email string) (user.User, error) {
 	var user user.User
 
 	row := r.db.QueryRow("SELECT * FROM users WHERE email = $1", email)
@@ -26,7 +26,7 @@ func (r *UserPostgresRepository) FindByEmail(email string) (user.User, error) {
 	return user, err
 }
 
-func (r *UserPostgresRepository) FindByID(id string) (user.User, error) {
+func (r *UserPostgresRepository) GetByID(id string) (user.User, error) {
 	var user user.User
 
 	row := r.db.QueryRow("SELECT * FROM users WHERE id = $1", id)
