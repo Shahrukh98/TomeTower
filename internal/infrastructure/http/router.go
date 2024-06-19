@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"tometower/internal/domain/author"
 	"tometower/internal/domain/genre"
 	"tometower/internal/domain/user"
 	"tometower/internal/infrastructure/persistence/postgres"
@@ -67,6 +68,16 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func AuthorRouter(repo author.AuthorRepository) *http.ServeMux {
+	service := author.NewAuthorService(repo)
+	handler := NewAuthorHandler(service)
+
+	router := http.NewServeMux()
+	router.HandleFunc("/", handler.GetAll)
+	router.HandleFunc("/{author}", handler.GetByID)
+	return router
+}
+
 func GenreRouter(repo genre.GenreRepository) *http.ServeMux {
 	service := genre.NewGenreService(repo)
 	handler := NewGenreHandler(service)
@@ -91,13 +102,16 @@ func UserRouter(repo user.UserRepository) *http.ServeMux {
 func TomeTowerRouter(db *sql.DB) *http.ServeMux {
 	userRepo := postgres.NewUserPostgresRepository(db)
 	genreRepo := postgres.NewGenrePostgresRepository(db)
+	authorRepo := postgres.NewAuthorPostgresRepository(db)
 
 	userRouter := UserRouter(userRepo)
-	genreRotuer := GenreRouter(genreRepo)
+	genreRouter := GenreRouter(genreRepo)
+	authorRouter := AuthorRouter(authorRepo)
 
 	mainRouter := http.NewServeMux()
 	mainRouter.Handle("/users/", http.StripPrefix("/users", userRouter))
-	mainRouter.Handle("/genres/", http.StripPrefix("/genres", genreRotuer))
+	mainRouter.Handle("/genres/", http.StripPrefix("/genres", genreRouter))
+	mainRouter.Handle("/authors/", http.StripPrefix("/authors", authorRouter))
 
 	return mainRouter
 }
