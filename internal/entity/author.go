@@ -1,16 +1,16 @@
-package author
+package entity
 
 import (
 	"time"
 )
 
 type Author struct {
-	ID          string
+	Id          string
 	Name        string
 	PhotoUrl    string
 	Nationality string
-	DateOfBirth time.Time
-	DateOfDeath time.Time
+	DateOfBirth string
+	DateOfDeath string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

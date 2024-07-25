@@ -1,11 +1,11 @@
-package genre
+package entity
 
 import (
 	"time"
 )
 
 type Genre struct {
-	ID        string
+	Id        string
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"os"
 
-	myhttp "tometower/internal/infrastructure/http"
-	"tometower/pkg/util"
-
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+
+	httpInterface "tometower/internal/interface/http"
+	"tometower/internal/middleware"
 )
 
 type App struct {
-	AppRouter *http.ServeMux
+	AppRouter *middleware.Logger
 }
 
 func NewApp() *App {
@@ -35,7 +35,7 @@ func NewApp() *App {
 		log.Fatal(err)
 	}
 
-	appRouter := myhttp.TomeTowerRouter(db)
+	appRouter := httpInterface.Router(db)
 
 	return &App{
 		AppRouter: appRouter,
@@ -44,6 +44,5 @@ func NewApp() *App {
 
 func (app *App) Run(addr string) error {
 	log.Printf("Server started on %s", addr)
-	wrappedRouter := util.NewLogger(app.AppRouter)
-	return http.ListenAndServe(addr, wrappedRouter)
+	return http.ListenAndServe(addr, app.AppRouter)
 }

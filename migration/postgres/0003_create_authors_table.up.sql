@@ -6,7 +6,7 @@ create table if not exists authors (
     photo_url varchar(2048) not null,
     nationality varchar(255),
     date_of_birth date,
-    date_of_death date,
+    date_of_death date default null,
     created_at timestamp default CURRENT_TIMESTAMP,
     updated_at timestamp default CURRENT_TIMESTAMP
 );
